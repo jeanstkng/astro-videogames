@@ -1,38 +1,37 @@
 ---
-import type { GetStaticPaths } from "astro";
-import Layout from "../../layouts/Layout.astro"
-import type { IVideoGame } from "../../types/videogame"
+import Layout from "../../layouts/Layout.astro";
+import type { IVideoGame } from "../../types/videogame";
 
-export const getStaticPaths = (async () => {
-    const gamesResponse = await fetch("https://www.freetogame.com/api/games?platform=pc");
+export async function getStaticPaths() {
+    const gamesResponse = await fetch(
+       "https://www.freetogame.com/api/games?platform=pc&category=mmorpg",
+    );
     const parsedGames: IVideoGame[] = await gamesResponse.json();
-
+    
     return parsedGames.map((item) => ({
         params: {
-            game: item.id
-        }
+            game: `${item.id}`,
+        },
     }));
-}) satisfies GetStaticPaths;
+}
 
-const { game } = Astro.params
+const { game } = Astro.params;
 
 const gameResp = await fetch(`https://www.freetogame.com/api/game?id=${game}`);
 const parsedGame: IVideoGame = await gameResp.json();
 
-console.log(parsedGame);
-
 ---
 
-<Layout title={parsedGame.title}>
-    <div class="mt-6 mr-auto ml-auto game-width">
-        <h3 class=" text-3xl">
+<Layout slot="despues" title={parsedGame.title}>
+    <div class="mt-6 mr-auto ml-auto list-width">
+        <h3 class="text-3xl">
             {parsedGame.title}
         </h3>
-        <a href={parsedGame.game_url} target="_blank">
+        <a href={`/${parsedGame.game_url}`} target="_blank">
             Ir al juego: {parsedGame.game_url}
         </a>
         <p>
-            {parsedGame.short_description}
+            {parsedGame.description}
         </p>
         <p class="text-sm">
             {parsedGame.release_date}
@@ -41,7 +40,7 @@ console.log(parsedGame);
 </Layout>
 
 <style>
-    .game-width {
+    .list-width {
         width: 750px;
     }
 </style>
